@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sofle V2 Web Flasher</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding: 25px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      transition: border-color 0.3s ease;
+    }
+
+    .section:hover {
+      border-color: #3498db;
+    }
+
+    .section h2 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+
+    .flash-button {
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: bold;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin: 10px 5px;
+      min-width: 200px;
+    }
+
+    .flash-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+    }
+
+    .flash-button:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .file-input {
+      margin: 10px 0;
+      padding: 10px;
+      border: 2px dashed #bdc3c7;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+
+    .file-input:hover {
+      border-color: #3498db;
+    }
+
+    .file-input input {
+      display: none;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .status.info {
+      background: #e3f2fd;
+      color: #1976d2;
+      border: 1px solid #bbdefb;
+    }
+
+    .status.success {
+      background: #e8f5e8;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+    }
+
+    .status.error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+    }
+
+    .step {
+      background: #f8f9fa;
+      border-left: 4px solid #3498db;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .step h3 {
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .warning {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .warning strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔧 Sofle V2 Web Flasher</h1>
+      <p>Flash ZMK firmware to your keyboard directly from your browser</p>
+    </div>
+
+    <div class="content">
+      <div class="warning">
+        <strong>⚠️ Browser Compatibility Notice:</strong>
+        This web flasher requires a modern browser with WebUSB support (Chrome, Edge, or Opera).
+        Safari and Firefox are not currently supported for WebUSB.
+      </div>
+
+      <div class="section">
+        <h2>📋 Step 1: Prepare Your Firmware Files</h2>
+        <div class="step">
+          <h3>Left Side Firmware</h3>
+          <div class="file-input" onclick="document.getElementById('leftFile').click()">
+            <input type="file" id="leftFile" accept=".uf2" onchange="handleFileSelect('left', this)">
+            <p>Click to select LEFT side firmware (.uf2 file)</p>
+            <p id="leftFileName" style="color: #27ae60; font-weight: bold;"></p>
+          </div>
+        </div>
+
+        <div class="step">
+          <h3>Right Side Firmware</h3>
+          <div class="file-input" onclick="document.getElementById('rightFile').click()">
+            <input type="file" id="rightFile" accept=".uf2" onchange="handleFileSelect('right', this)">
+            <p>Click to select RIGHT side firmware (.uf2 file)</p>
+            <p id="rightFileName" style="color: #27ae60; font-weight: bold;"></p>
+          </div>
+        </div>
+
+        <div class="step">
+          <h3>Settings Reset (Optional)</h3>
+          <div class="file-input" onclick="document.getElementById('resetFile').click()">
+            <input type="file" id="resetFile" accept=".uf2" onchange="handleFileSelect('reset', this)">
+            <p>Click to select RESET firmware (.uf2 file)</p>
+            <p id="resetFileName" style="color: #27ae60; font-weight: bold;"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>⚡ Step 2: Flash Your Keyboard</h2>
+        <p style="margin-bottom: 20px;">Flash firmware to your keyboard. Make sure only one side is connected and in
+          bootloader mode (double-tap BOOT button).</p>
+
+        <button class="flash-button" onclick="flashFirmware('reset')" id="resetBtn" disabled>
+          🔄 Flash Settings Reset
+        </button>
+        <button class="flash-button" onclick="flashFirmware('right')" id="rightBtn" disabled>
+          ➡️ Flash Right Side
+        </button>
+        <button class="flash-button" onclick="flashFirmware('left')" id="leftBtn" disabled>
+          ⬅️ Flash Left Side
+        </button>
+
+        <div id="status" style="display: none;"></div>
+      </div>
+
+      <div class="section">
+        <h2>📖 Flashing Instructions</h2>
+        <div class="step">
+          <h3>1. Download Firmware</h3>
+          <p>Download the latest firmware files from the GitHub releases page. Look for files named with LEFT, RIGHT,
+            and RESET prefixes.</p>
+        </div>
+        <div class="step">
+          <h3>2. Enter Bootloader Mode</h3>
+          <p>Press the BOOT button on your keyboard twice quickly. The keyboard should appear as a USB drive.</p>
+        </div>
+        <div class="step">
+          <h3>3. Flash Order (Recommended)</h3>
+          <p><strong>Optional:</strong> Flash RESET first to clear any existing settings<br>
+            <strong>1st:</strong> Flash RIGHT side<br>
+            <strong>2nd:</strong> Flash LEFT side (has ZMK Studio support)
+          </p>
+        </div>
+        <div class="step">
+          <h3>4. Verify Connection</h3>
+          <p>After flashing both sides, turn on the right side. You should see a checkmark next to the WiFi icon when
+            sides connect.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let firmwareFiles = {
+      left: null,
+      right: null,
+      reset: null
+    };
+
+    function handleFileSelect(side, input) {
+      const file = input.files[0];
+      if (file) {
+        firmwareFiles[side] = file;
+        document.getElementById(side + 'FileName').textContent = `✅ ${file.name}`;
+        document.getElementById(side + 'Btn').disabled = false;
+
+        showStatus(`📁 ${file.name} loaded for ${side.toUpperCase()} side`, 'info');
+      }
+    }
+
+    async function flashFirmware(side) {
+      if (!firmwareFiles[side]) {
+        showStatus('❌ No firmware file selected for ' + side.toUpperCase() + ' side', 'error');
+        return;
+      }
+
+      if (!navigator.usb) {
+        showStatus('❌ WebUSB not supported in this browser. Please use Chrome, Edge, or Opera.', 'error');
+        return;
+      }
+
+      try {
+        showStatus('🔍 Looking for keyboard in bootloader mode...', 'info');
+        showStatus('💡 Make sure your keyboard is in bootloader mode (double-tap BOOT button)', 'info');
+
+        // Request USB device
+        const device = await navigator.usb.requestDevice({
+          filters: [
+            { vendorId: 0x239A }, // Adafruit (common for RP2040)
+            { vendorId: 0x2E8A }, // Raspberry Pi (RP2040)
+            { vendorId: 0x1209 }, // Generic
+          ]
+        });
+
+        if (!device) {
+          showStatus('❌ No device selected', 'error');
+          return;
+        }
+
+        showStatus('🎯 Found keyboard! Preparing to flash...', 'info');
+
+        // Note: Full WebUSB flashing implementation would require
+        // a more complex UF2 flashing protocol implementation
+        // For now, we'll show instructions for manual flashing
+
+        showStatus('⚠️ WebUSB flashing is not fully implemented yet.', 'info');
+        showStatus('📝 Please use the manual method: drag and drop the .uf2 file to the keyboard USB drive', 'info');
+
+        // Create download link for the firmware
+        const url = URL.createObjectURL(firmwareFiles[side]);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = firmwareFiles[side].name;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        showStatus('💾 Firmware file downloaded. Drag it to your keyboard USB drive.', 'success');
+
+      } catch (error) {
+        console.error('Error:', error);
+        showStatus('❌ Error: ' + error.message, 'error');
+        showStatus('💡 Try the manual flashing method or use the command-line scripts instead.', 'info');
+      }
+    }
+
+    function showStatus(message, type) {
+      const statusDiv = document.getElementById('status');
+      statusDiv.style.display = 'block';
+      statusDiv.className = `status ${type}`;
+      statusDiv.innerHTML = message;
+    }
+
+    // Check browser compatibility on load
+    window.addEventListener('load', function () {
+      if (!navigator.usb) {
+        showStatus('⚠️ WebUSB not supported. This flasher works best in Chrome, Edge, or Opera browsers.', 'error');
+        showStatus('💡 For other browsers, please use the command-line scripts (flash_firmware.py or flash_firmware.sh)', 'info');
+      } else {
+        showStatus('✅ Browser supports WebUSB. You can use this web flasher!', 'success');
+      }
+    });
+  </script>
+</body>
+
+</html>

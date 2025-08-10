@@ -21,10 +21,25 @@ jobs:
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@main
     
   release:
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'workflow_dispatch')
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Debug release conditions
+        run: |
+          echo "🔍 Release Job Debug Information:"
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Repository: ${{ github.repository }}"
+          
+          if [[ "${{ github.ref_name }}" != "main" && "${{ github.ref_name }}" != "master" ]]; then
+            echo "⚠️  WARNING: Creating release from non-main branch (${{ github.ref_name }})"
+            echo "This is allowed for manual testing but not recommended for production"
+          fi
+          
       - name: Get current date and time
         id: date
         run: |
@@ -39,8 +54,10 @@ jobs:
       - name: Prepare release assets
         run: |
           mkdir -p release_assets
-          # Find and copy all .uf2 files to release assets
-          find artifacts -name "*.uf2" -exec cp {} release_assets/ \;
+          # Find and rename .uf2 files with clearer names
+          find artifacts -name "sofle_left-*.uf2" -exec cp {} release_assets/LEFT-sofle_left-nice_nano_v2-zmk.uf2 \;
+          find artifacts -name "sofle_right-*.uf2" -exec cp {} release_assets/RIGHT-sofle_right-nice_nano_v2-zmk.uf2 \;
+          find artifacts -name "settings_reset-*.uf2" -exec cp {} release_assets/RESET-settings_reset-nice_nano_v2-zmk.uf2 \;
           # List what we found
           echo "Found firmware files:"
           ls -la release_assets/
@@ -48,8 +65,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: firmware-${{ steps.date.outputs.timestamp }}
-          name: ZMK Firmware Build - ${{ steps.date.outputs.readable_date }}
+          tag_name: firmware-${{ github.ref_name }}-${{ steps.date.outputs.timestamp }}
+          name: ZMK Firmware Build (${{ github.ref_name }}) - ${{ steps.date.outputs.readable_date }}
           body: |
             ## ZMK Firmware Build
             
@@ -58,9 +75,9 @@ jobs:
             **Branch:** ${{ github.ref_name }}
             
             ### Included Firmware Files:
-            - `sofle_left-nice_nano_v2-zmk.uf2` - Left side with ZMK Studio support
-            - `sofle_right-nice_nano_v2-zmk.uf2` - Right side
-            - `settings_reset-nice_nano_v2-zmk.uf2` - Settings reset utility
+            - `LEFT-sofle_left-nice_nano_v2-zmk.uf2` - **Flash to LEFT side** (has ZMK Studio support)
+            - `RIGHT-sofle_right-nice_nano_v2-zmk.uf2` - **Flash to RIGHT side**
+            - `RESET-settings_reset-nice_nano_v2-zmk.uf2` - **Settings reset utility** (flash to either side to reset)
             
             ### Installation Instructions:
             1. Download the appropriate `.uf2` file for each side of your keyboard

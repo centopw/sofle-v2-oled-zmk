@@ -1,57 +1,139 @@
-# Sofle V2 Keyboard Guide
-This guide is for flashing the Ergomech Sofle V2 Keyboard. The Sofle V2 is 6×4+5 keys column-staggered split keyboard, using Cherry switches.
+# Sofle V2 ZMK Firmware Repository
+Complete ZMK firmware solution for the Ergomech Sofle V2 Wireless keyboard with automated builds and multiple flashing options.
 
-# ErgoMech Sofle V2 Wireless
-The Ergomech Sofle V2 Wireless uses a Nice!Nano microcontroller and runs the ZMK firmware. This guide will show you how to flash the ZMK firmware to the Nice!Nano microcontroller.
+## About This Repository
+This is a **standalone repository** providing ready-to-use ZMK firmware for the Sofle V2 keyboard. The Sofle V2 is a 6×4+5 keys column-staggered split keyboard using Cherry MX switches and Nice!Nano microcontrollers.
+
+## Features
+- 🚀 **Automatic firmware builds** via GitHub Actions
+- 📦 **Easy releases** - download directly from the Releases tab
+- 🔧 **Multiple flashing methods** - automated scripts, web interface, or manual
+- 🎛️ **ZMK Studio support** on the left side for live keymap editing
+- 📱 **OLED display support** with connection status indicators
+- 🔋 **Wireless connectivity** with battery monitoring
 
 ## Default keymap
 The default keymap of this keyboard can be found here:
 ![Default Keymap](./keymap-drawer/sofle.svg)
 
 ## Flashing the Sofle V2
-The ZMK cli tool would typically have you step through several questions to generate the necessary code to flash the firmware then upload it to a new repository on GitHub.
-However, Ergomech has already done this for you. You can find the repository [here](https://github.com/ergomechstore/sofle-v2-nicenano-oled). Assuming you already have a GitHub account,
-you can fork the repository, and make modifications to the keymap files in the future. For now, the guide will continue with the assumption that you have forked the repository.
 
-### Running the Workflow
-The repository has a GitHub workflow that leverages the zmkfirmware/zmk repository to build the firmware. The workflow will build the firmware and upload it as an artifact to the repository.
-The workflow is triggered on push, pull_request, and manually via workflow_dispatch. You can trigger the workflow manually by going to the Actions tab in your forked repository and selecting the workflow.
+### 🚀 Easy Firmware Download (Recommended)
+This repository automatically builds and releases firmware files! No need to manually run workflows.
 
-### Workflow Artifact
-Once the workflow has completed, you can download the artifact from the Actions tab. The artifact will be a .zip file that contains the firmware. Extract the .zip file in your
-local directory. The extracted files will include:
-- `sofle_right-nice_nano_v2-zmk.uf2`
-- `sofle_left-nice_nano_v2-zmk.uf2`
-- `settings_reset-nice_nano_v2-zmk.uf2`
+**📦 Get Latest Firmware:**
+1. Go to the [**Releases**](../../releases) page (much easier than Actions tab!)
+2. Download the latest release
+3. You'll get clearly named files:
+   - `LEFT-sofle_left-nice_nano_v2-zmk.uf2` - **Flash to LEFT side** (has ZMK Studio support)
+   - `RIGHT-sofle_right-nice_nano_v2-zmk.uf2` - **Flash to RIGHT side**
+   - `RESET-settings_reset-nice_nano_v2-zmk.uf2` - **Settings reset utility**
 
-### Flashing the keymap and firmware
-#### Steps to ensure successful flashing
-- Keep in mind that the power switch on the wireless Ergomech Sofle V2 is only **one** of the ways that the keyboard can be powered. The other way is to plug in the USB-C cable.
-When flashing one side of the keyboard, the other side must be off. 
-- The keyboard must be in bootloader mode to flash the firmware. To enter the bootloader mode, press the "BOOT" button twice in quick succession. 
-- If you are having trouble flashing, you can always flash the `settings_reset-nice_nano_v2-zmk.uf2` file first. This is a good way to make sure 
-that the keyboard is in a known state before flashing the firmware. The `reset` flash can be visually confirmed by the screen on the Nice!Nano microcontroller 
-not displaying anything after the flash is complete.
+### 🔧 Multiple Flashing Methods Available
 
-#### Flashing Order
-There is no required order to flash the firmware. You can flash the left or right side first. Assuming that you are attempting to flash the sides with the correct
-file (i.e. the right side with the `sofle_right-nice_nano_v2-zmk.uf2` file), you may find it helpful to follow the following order:
-1. Confirm both sides of the keyboard are off.
-2. Flash the right side of the keyboard, unplug the USB-C cable, and set it aside.
-3. Flash the left side of the keyboard, leaving it plugged in after.
-4. Turn on the right side of the keyboard. You should see the screen on the Nice!Nano microcontroller light up and display a checkmark next to the wifi icon if the sides have connected.
-5. Open you favorite text editor and test the keyboard.
+#### Method 1: Automated Scripts (Easiest!)
+We provide automated flashing scripts that detect your keyboard and guide you through the process:
 
+**Python Script (Cross-platform):**
+```bash
+python3 flash_firmware.py
+```
 
-#### Flashing the firmware
-1. Connect the keyboard to your computer via USB-C cable.
-2. Press the "BOOT" button twice in quick succession to enter bootloader mode.
-3. The keyboard should appear as a USB drive on your computer.
-4. Drag and drop the `uf2` file that coincides with the side of the keyboard you are flashing onto the USB drive that represents the keyboard.
-5. The keyboard will automatically reboot and the new firmware will be flashed.
+**Shell Script (macOS/Linux):**
+```bash
+./flash_firmware.sh
+```
 
-**Note:** Some operating systems may show a failure when the keyboard reboots, or the USB drive may disappear. This is normal and the keyboard should be flashed successfully.
-The keyboard flashing has been confirmed to work successfully on Windows 10, and Linux. 
+These scripts will:
+- ✅ Automatically detect when your keyboard enters bootloader mode
+- ✅ Guide you through flashing each side
+- ✅ Provide clear success/error messages
+- ✅ Recommend the optimal flashing order
+
+#### Method 2: Web-Based Flasher
+Open `web_flasher.html` in your browser (Chrome/Edge/Opera) for a graphical flashing interface.
+
+#### Method 3: Manual Flashing (Traditional)
+The traditional drag-and-drop method is still available and explained below.
+
+### 🔄 Building Your Own Firmware (Advanced Users)
+If you want to modify the keymap and build custom firmware:
+
+1. **Fork or clone** this repository to your own GitHub account
+2. **Modify** the keymap files in the `config/` directory to customize your layout
+3. **Push changes** to trigger automatic builds via GitHub Actions
+4. **Download** your custom firmware from the Releases page
+
+This repository uses an automated GitHub workflow that leverages the zmkfirmware/zmk build system to compile firmware automatically on every push to the main branch. No local build environment required!
+
+## 📋 Manual Flashing Instructions (Method 3)
+
+### ⚠️ Important Pre-Flashing Steps
+- **Power Management:** Only ONE side should be powered during flashing. Turn off the other side completely.
+- **Bootloader Mode:** Press the "BOOT" button **twice quickly** to enter bootloader mode
+- **Troubleshooting:** If having issues, flash the `RESET` firmware first to clear settings
+
+### 🔄 Recommended Flashing Order
+1. **Optional:** Flash `RESET-settings_reset-nice_nano_v2-zmk.uf2` to either side first (clears all settings)
+2. **First:** Flash `RIGHT-sofle_right-nice_nano_v2-zmk.uf2` to the right side
+3. **Second:** Flash `LEFT-sofle_left-nice_nano_v2-zmk.uf2` to the left side (has ZMK Studio support)
+
+### 🛠️ Step-by-Step Manual Flashing
+1. **Connect** the keyboard side to your computer via USB-C cable
+2. **Enter Bootloader:** Press the "BOOT" button twice quickly in succession
+3. **Verify:** The keyboard should appear as a USB drive on your computer
+4. **Flash:** Drag and drop the correct `.uf2` file to the USB drive
+5. **Wait:** The keyboard will automatically reboot with new firmware
+
+### ✅ Verify Successful Installation
+- After flashing both sides, turn on the right side
+- Look for a **checkmark next to the WiFi icon** on the OLED display
+- This indicates the sides have successfully paired
+- Test typing in your favorite text editor
+
+### 🖥️ Operating System Notes
+- **Windows 10/11:** ✅ Confirmed working
+- **macOS:** ✅ Confirmed working  
+- **Linux:** ✅ Confirmed working
+- **Note:** Some OS may show an error when the keyboard reboots - this is normal and indicates successful flashing
+
+## 🔧 Troubleshooting
+
+### Common Issues and Solutions
+
+**❌ "Keyboard not detected" or "No USB drive appears"**
+- Double-check you pressed BOOT button **twice quickly** (not once, not slowly)
+- Try a different USB-C cable (some cables are power-only)
+- Make sure the other keyboard side is completely powered off
+- Wait 10 seconds and try the double-tap again
+
+**❌ "Firmware file won't copy" or "Access denied"**
+- Make sure you're using the correct `.uf2` file for the side you're flashing
+- Try copying to a different location first, then to the keyboard drive
+- Restart your computer and try again
+- Check if your antivirus is blocking the operation
+
+**❌ "Sides won't pair" or "No checkmark on WiFi icon"**
+- Flash the RESET firmware to both sides first
+- Make sure you flashed the correct firmware to each side (LEFT vs RIGHT)
+- Power cycle both sides: turn off, wait 10 seconds, turn on right side first
+- Check battery levels - low battery can cause pairing issues
+
+**❌ "Keys not working" or "Wrong key mappings"**
+- Verify you downloaded firmware from the correct repository/release
+- Check that you flashed the LEFT firmware to the left side and RIGHT to the right side
+- Try flashing the RESET firmware and then re-flash the main firmware
+
+**❌ "ZMK Studio not working"**
+- ZMK Studio only works with the LEFT side (it has the special configuration)
+- Make sure you're connecting to the left side via USB
+- Update to the latest ZMK Studio version
+
+### 🆘 Still Having Issues?
+1. Try the automated flashing scripts - they handle many edge cases automatically
+2. Use the RESET firmware to clear all settings and start fresh
+3. Check the [ZMK Discord](https://discord.gg/8cfMkQksSB) for community support
+4. Open an issue on this repository with details about your problem
 
 ## Modifying the keymap
 
