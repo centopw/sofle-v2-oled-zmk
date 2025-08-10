@@ -1,23 +1,27 @@
-# This file generates the GitHub Actions matrix
-# For simple board + shield combinations, add them
-# to the top level board and shield arrays, for more
-# control, add individual board + shield combinations to
-# the `include` property, e.g:
+# ZMK Build Configuration for Sofle v2 with OLED
+# This file defines the build matrix for GitHub Actions
+# 
+# For simple board + shield combinations, add them to the top level board and 
+# shield arrays. For more control, add individual board + shield combinations 
+# to the `include` property.
 #
-# board: [ "nice_nano_v2" ]
-# shield: [ "corne_left", "corne_right" ]
-# include:
-#   - board: bdn9_rev2
-#   - board: nice_nano_v2
-#     shield: reviung41
+# Documentation: https://zmk.dev/docs/development/build-flash
 #
 ---
 include:
+  # Left side with ZMK Studio support and USB UART for debugging
+  # ZMK Studio enables live keymap editing and debugging features
   - board: nice_nano_v2
     shield: sofle_left
-    snippet: studio-rpc-usb-uart
-    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    snippet: studio-rpc-usb-uart  # Enables USB UART communication for ZMK Studio
+    cmake-args: -DCONFIG_ZMK_STUDIO=y  # Enable ZMK Studio support
+    
+  # Right side - standard configuration
+  # The right side typically doesn't need ZMK Studio as it connects to the left
   - board: nice_nano_v2
     shield: sofle_right
+    
+  # Settings reset utility - useful for clearing stored settings/bonds
+  # Flash this to reset all keyboard settings to defaults
   - board: nice_nano_v2
     shield: settings_reset
